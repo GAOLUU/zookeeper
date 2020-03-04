@@ -18,9 +18,6 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import java.io.IOException;
-import javax.management.JMException;
-import javax.security.sasl.SaslException;
 import org.apache.yetus.audience.InterfaceAudience;
 import org.apache.zookeeper.audit.ZKAuditProvider;
 import org.apache.zookeeper.jmx.ManagedUtil;
@@ -41,6 +38,10 @@ import org.apache.zookeeper.server.util.JvmPauseMonitor;
 import org.apache.zookeeper.util.ServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.management.JMException;
+import javax.security.sasl.SaslException;
+import java.io.IOException;
 
 /**
  *
@@ -121,6 +122,7 @@ public class QuorumPeerMain {
     protected void initializeAndRun(String[] args) throws ConfigException, IOException, AdminServerException {
         QuorumPeerConfig config = new QuorumPeerConfig();
         if (args.length == 1) {
+            // 加载配置文件
             config.parse(args[0]);
         }
 
@@ -133,8 +135,10 @@ public class QuorumPeerMain {
         purgeMgr.start();
 
         if (args.length == 1 && config.isDistributed()) {
+            // 集群模式
             runFromConfig(config);
         } else {
+            // 单例模式
             LOG.warn("Either no config or no quorum defined in config, running in standalone mode");
             // there is only server in the quorum -- run as standalone
             ZooKeeperServerMain.main(args);
