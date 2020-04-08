@@ -82,11 +82,15 @@ public class Follower extends Learner {
 
         try {
             self.setZabState(QuorumPeer.ZabState.DISCOVERY);
+            // 找到leader
             QuorumServer leaderServer = findLeader();
             try {
+                // 连接leader
                 connectToLeader(leaderServer.addr, leaderServer.hostname);
                 connectionTime = System.currentTimeMillis();
+
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
+
                 if (self.isReconfigStateChange()) {
                     throw new Exception("learned about role change");
                 }
@@ -151,16 +155,19 @@ public class Follower extends Learner {
     }
 
     /**
+     * 处理leader发送的包
+     *
      * Examine the packet received in qp and dispatch based on its contents.
      * @param qp
      * @throws IOException
      */
     protected void processPacket(QuorumPacket qp) throws Exception {
+        // 根据包的类型，进行相应的处理
         switch (qp.getType()) {
-        case Leader.PING:
+        case Leader.PING: // 心跳保持 💗
             ping(qp);
             break;
-        case Leader.PROPOSAL:
+        case Leader.PROPOSAL: // TODO
             ServerMetrics.getMetrics().LEARNER_PROPOSAL_RECEIVED_COUNT.add(1);
             TxnLogEntry logEntry = SerializeUtils.deserializeTxn(qp.getData());
             TxnHeader hdr = logEntry.getHeader();
@@ -199,7 +206,7 @@ public class Follower extends Learner {
                 ServerMetrics.getMetrics().OM_PROPOSAL_PROCESS_TIME.add(Time.currentElapsedTime() - startTime);
             }
             break;
-        case Leader.COMMIT:
+        case Leader.COMMIT: // 提交
             ServerMetrics.getMetrics().LEARNER_COMMIT_RECEIVED_COUNT.add(1);
             fzk.commit(qp.getZxid());
             if (om != null) {
