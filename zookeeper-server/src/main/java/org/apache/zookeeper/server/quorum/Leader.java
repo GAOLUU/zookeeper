@@ -568,6 +568,8 @@ public class Leader extends LearnerMaster {
     }
 
     /**
+     * leader逻辑处理
+     *
      * This method is main function that is called to lead
      *
      * @throws IOException
@@ -770,6 +772,7 @@ public class Leader extends LearnerMaster {
                     }
                     tickSkip = !tickSkip;
                 }
+                // ping所有的learner（follower、observer）
                 for (LearnerHandler f : getLearners()) {
                     f.ping();
                 }
