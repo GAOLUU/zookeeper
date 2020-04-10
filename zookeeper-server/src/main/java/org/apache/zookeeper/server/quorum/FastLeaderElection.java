@@ -1034,7 +1034,7 @@ public class FastLeaderElection implements Election {
                                 // Verify if there is any change in the proposed leader
                                 while ((n = recvqueue.poll(finalizeWait, TimeUnit.MILLISECONDS)) != null) {
                                     if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch, proposedLeader, proposedZxid, proposedEpoch)) {
-                                        // 有变更消息，则重新选举
+                                        // 新通知提议的leader > 当前选出的leader
                                         recvqueue.put(n);
                                         break;
                                     }
